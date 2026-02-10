@@ -8,13 +8,13 @@
 
 ## Day 1-2: Environment Setup (2 hours)
 
-- [ ] Create GitHub repo
-- [ ] Set up Python virtual environment (`python -m venv venv`)
-- [ ] Install core libraries:
+- [x] Create GitHub repo
+- [x] Set up Python virtual environment (`python -m venv venv`)
+- [x] Install core libraries:
   ```bash
   pip install pandas numpy yfinance ta scikit-learn matplotlib seaborn jupyter
   ```
-- [ ] Create basic project structure:
+- [x] Create basic project structure:
   ```
   trading-ml/
   ├── data/
@@ -33,17 +33,17 @@
 
 ## Day 3-4: Data Collection (4 hours)
 
-- [ ] Write `data_collection.py` script to download historical data
-- [ ] Download 2 years of daily data for starter stocks:
+- [x] Write `data_collection.py` script to download historical data
+- [x] Download 2 years of daily data for starter stocks:
   - SPY (S&P 500 ETF)
   - QQQ (Nasdaq ETF)
   - AAPL (Apple)
   - MSFT (Microsoft)
   - TSLA (Tesla)
-- [ ] Save data to CSV with proper date indexing
-- [ ] Create Jupyter notebook `01_data_exploration.ipynb`
+- [x] Save data to CSV with proper date indexing
+- [x] Create Jupyter notebook `01_data_exploration.ipynb`
 - [ ] Visualize data:
-  - [ ] Price charts over time
+  - [x] Price charts over time
   - [ ] Volume patterns
   - [ ] Basic moving averages (20-day, 50-day)
 - [ ] Document any data quality issues
