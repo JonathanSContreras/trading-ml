@@ -8,13 +8,13 @@
 
 ## Day 1-2: Environment Setup (2 hours)
 
-- [x] Create GitHub repo
-- [x] Set up Python virtual environment (`python -m venv venv`)
-- [x] Install core libraries:
+- [x] Create GitHub repo (2/9)
+- [x] Set up Python virtual environment (`python -m venv venv`) (2/9)
+- [x] Install core libraries: (2/9)
   ```bash
   pip install pandas numpy yfinance ta scikit-learn matplotlib seaborn jupyter
   ```
-- [x] Create basic project structure:
+- [x] Create basic project structure: (2/9)
   ```
   trading-ml/
   ├── data/
@@ -27,26 +27,27 @@
   ├── progress/
   └── tests/
   ```
-- [x] Initialize git and make first commit
+- [x] Initialize git and make first commit (2/9)
 
 ---
 
 ## Day 3-4: Data Collection (4 hours)
 
-- [x] Write `data_collection.py` script to download historical data
-- [x] Download 2 years of daily data for starter stocks:
+- [x] Write `data_collection.py` script to download historical data (2/9)
+- [x] Download 2 years of daily data for starter stocks: (2/9)
   - SPY (S&P 500 ETF)
   - QQQ (Nasdaq ETF)
   - AAPL (Apple)
   - MSFT (Microsoft)
   - TSLA (Tesla)
-- [x] Save data to CSV with proper date indexing
-- [x] Create Jupyter notebook `01_data_exploration.ipynb`
-- [ ] Visualize data:
-  - [x] Price charts over time
-  - [x] Volume patterns
-  - [x] Basic moving averages (20-day, 50-day)
-- [ ] Document any data quality issues
+- [x] Save data to CSV with proper date indexing (2/9)
+- [x] Create Jupyter notebook `01_data_exploration.ipynb` (2/9)
+- [x] Visualize data: (2/10)
+  - [x] Price charts over time (2/9)
+  - [x] Volume patterns (2/10)
+  - [x] Basic moving averages (20-day, 50-day) (2/10)
+- [x] Document any data quality issues (2/9)
+  - Had to mess with multi-index header and the unnanmes index column (going from multi-index header to single clean header)
 
 ---
 
@@ -60,8 +61,8 @@
   - [ ] MACD (Moving Average Convergence Divergence)
   - [ ] Bollinger Bands
   - [ ] Volume indicators (Volume SMA, Volume ratio)
-- [ ] Create target variable:
-  - [ ] Define prediction target (e.g., "price increases >1% in next 3 days")
+- [ ] Create target variable (AAPL only first, generalize later):
+  - [ ] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down)
   - [ ] Label historical data with target
 - [ ] Create visualization notebook `02_feature_analysis.ipynb`:
   - [ ] Plot features vs target variable
