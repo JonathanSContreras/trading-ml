@@ -53,7 +53,7 @@
 
 ## Day 5-7: Feature Engineering Basics (4 hours)
 
-- [ ] Create `feature_engineering.py` module
+- [x] Create `feature_engineering.py` module (2/10)
 - [ ] Implement technical indicators:
   - [ ] Simple Moving Averages (SMA 20, 50, 200)
   - [ ] Exponential Moving Average (EMA 12, 26)
@@ -62,7 +62,7 @@
   - [ ] Bollinger Bands
   - [ ] Volume indicators (Volume SMA, Volume ratio)
 - [ ] Create target variable (AAPL only first, generalize later):
-  - [ ] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down)
+  - [x] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down) (2/10)
   - [ ] Label historical data with target
 - [ ] Create visualization notebook `02_feature_analysis.ipynb`:
   - [ ] Plot features vs target variable
