@@ -27,7 +27,7 @@
   ├── progress/
   └── tests/
   ```
-- [ ] Initialize git and make first commit
+- [x] Initialize git and make first commit
 
 ---
 
@@ -44,8 +44,8 @@
 - [x] Create Jupyter notebook `01_data_exploration.ipynb`
 - [ ] Visualize data:
   - [x] Price charts over time
-  - [ ] Volume patterns
-  - [ ] Basic moving averages (20-day, 50-day)
+  - [x] Volume patterns
+  - [x] Basic moving averages (20-day, 50-day)
 - [ ] Document any data quality issues
 
 ---
