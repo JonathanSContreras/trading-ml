@@ -55,7 +55,7 @@
 
 - [x] Create `feature_engineering.py` module (2/10)
 - [ ] Implement technical indicators:
-  - [ ] Simple Moving Averages (SMA 20, 50, 200)
+  - [x] Simple Moving Averages (SMA 20, 50, 200)
   - [ ] Exponential Moving Average (EMA 12, 26)
   - [ ] RSI (Relative Strength Index)
   - [ ] MACD (Moving Average Convergence Divergence)
