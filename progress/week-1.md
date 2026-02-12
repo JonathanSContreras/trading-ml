@@ -55,11 +55,11 @@
 
 - [x] Create `feature_engineering.py` module (2/10)
 - [ ] Implement technical indicators:
-  - [x] Simple Moving Averages (SMA 20, 50, 200)
-  - [ ] Exponential Moving Average (EMA 12, 26)
-  - [ ] RSI (Relative Strength Index)
-  - [ ] MACD (Moving Average Convergence Divergence)
-  - [ ] Bollinger Bands
+  - [x] Simple Moving Averages (SMA 20, 50, 200) (2/11)
+  - [x] Exponential Moving Average (EMA 12, 26) (2/11)
+  - [x] RSI (Relative Strength Index) (2/11)
+  - [x] MACD (Moving Average Convergence Divergence) (2/11)
+  - [x] Bollinger Bands (2/11)
   - [ ] Volume indicators (Volume SMA, Volume ratio)
 - [ ] Create target variable (AAPL only first, generalize later):
   - [x] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down) (2/10)

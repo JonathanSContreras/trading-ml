@@ -146,4 +146,115 @@ def simple_moving_average(df, window=5):
 # 19 2024-01-30  186.106598  189.827948  185.542466  188.976790   55859400       0     -0.019246     -0.019357     -0.006275     -0.011646     -0.001914      0.006701      0.007286      0.001489      0.005589     -0.003463      -0.014698  185.958668
 # 20 2024-01-31  182.504074  185.176326  182.454600  185.116930   55467800       1     -0.019357      0.013341      0.007863      0.017787      0.026573      0.027169      0.021258      0.025439      0.016208      0.004751      -0.000081  185.897305
 # 21 2024-02-01  184.938782  185.027853  181.930044  182.098295   64885400       0      0.013341     -0.005405      0.004388      0.013058      0.013647      0.007813      0.011939      0.002830     -0.008476     -0.013245      -0.014799  186.026464
-print(simple_moving_average(df_with_multi_day_returns, window=100).head(200))
+# print(simple_moving_average(df_with_multi_day_returns, window=100).head(200))
+
+# Indicators (RSI, MACD, Bollinger Bands, etc.): 
+    # These technical indicators can help identify trends, momentum, and potential reversal points in the stock price.
+
+# RSI (Relative Strength Index): Measures the speed and change of price movements to identify overbought or oversold conditions.
+# This is helpful to identify potential reversal points in the stock price. An RSI above 70 typically indicates that the stock is overbought, 
+# suggesting a potential reversal or pullback in price, while an RSI below 30 indicates that the stock is oversold, suggesting a potential buying opportunity or a reversal to the upside.
+
+# Steps to Calculate RSI:
+# 1. Determine Period: 
+    # Choose a time period (commonly 14 days).
+# 2. Calculate Gains and Losses: 
+    # For each day, calculate the gain (if the price went up) or loss (if the price went down) compared to the previous day.
+    # Gains are positive, and losses are negative. If the price didn't change, both gain and loss are zero.
+# 3. Initial Average Gain and Loss: 
+    # For the first 14 days, calculate the average gain and average loss by summing the gains and losses over the period and dividing by 14.
+# 4. Calculate RS (Relative Strength): 
+    # RS = Average Gain / Average Loss. This ratio indicates the strength of the price movement.
+# 5. Calculate RSI: 
+    # RSI = 100 - (100 / (1 + RS)). This formula converts the RS value into a scale from 0 to 100, where values above 70 typically indicate overbought conditions and values below 30 indicate oversold conditions.
+# 6. Subsequent Average (Smoothing):
+    # For subsequent periods, use a smoothing technique to prevent sudden spikes or drops in the RSI value.
+    # Average Gain = [(Previous Average Gain * (n-1)) + Current Gain] / n
+    # Average Loss = [(Previous Average Loss * (n-1)) + Current Loss] / n
+
+# Key interpretation of RSI:
+# - RSI above 70: The stock is considered overbought, which may indicate a potential reversal or pullback in price.
+# - RSI below 30: The stock is considered oversold, which may indicate a potential buying opportunity or a reversal to the upside.
+# - RSI Near 50: The stock is considered to be in a neutral zone, where there is no clear indication of being overbought or oversold.
+
+def relative_strength_index(df, window=14):
+    '''
+    Function to calculate the Relative Strength Index (RSI) and add it as a new column.
+    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+    :param window: The number of days to calculate the RSI over (commonly 14).
+    :return: DataFrame with the new RSI column added.
+    '''
+    delta = df['Close'].diff() # calculates the difference in close price from the previous day
+    gain = delta.where(delta > 0, 0) # keeps gains and sets losses to 0
+    loss = -delta.where(delta < 0, 0) # keeps losses and sets gains to 0
+    avg_gain = gain.rolling(window=window).mean() # calculates the average gain over the specified window
+    avg_loss = loss.rolling(window=window).mean() # calculates the average loss over the specified window
+    # subsequent average (smoothing) for gains and losses
+    avg_gain = avg_gain.shift(1) * (window - 1) / window + gain / window # applies smoothing to the average gain
+    avg_loss = avg_loss.shift(1) * (window - 1) / window + loss / window # applies smoothing to the average loss
+    rs = avg_gain / avg_loss # calculates the relative strength
+    df[f'RSI_{window}'] = 100 - (100 / (1 + rs)) # calculates the RSI and adds it as a new column
+    return df
+
+# print(relative_strength_index(df_with_multi_day_returns, window=14).head(50))
+
+# MACD (Moving Average Convergence Divergence): Shows the relationship between two moving averages of a stock's price to identify potential buy or sell signals.
+# This is helpful to identify changes in the strength, direction, momentum, and duration of a trend in a stock's price. 
+# Which helps traders time entries and exits by identifying momentum shifts and trend reversals before they are fully reflected in the price.
+
+# Steps to calculate MACD:
+# 1. Calculate the Short-Term EMA:
+    # Choose a short-term period (commonly 12 days) and calculate the Exponential Moving Average (EMA) of the closing price over that period. The EMA gives more weight to recent prices, making it more responsive to recent price changes.
+# 2. Calculate the Long-Term EMA:
+    # Choose a long-term period (commonly 26 days) and calculate the EMA of the closing price over that period.
+# 3. Calculate the MACD Line:
+    # MACD Line = Short-Term EMA - Long-Term EMA. This line represents the difference between the two EMAs and indicates the momentum of the stock. A positive MACD line suggests that the short-term EMA is above the long-term EMA, indicating upward momentum, while a negative MACD line suggests downward momentum.
+# 4. Calculate the Signal Line:
+    # Choose a signal period (commonly 9 days) and calculate the EMA of the MACD line over that period. The Signal Line is used to generate buy or sell signals based on crossovers with the MACD line.
+
+def moving_average_convergence_divergence(df, short_window=12, long_window=26, signal_window=9):
+    '''
+    Function to calculate the Moving Average Convergence Divergence (MACD) and add it as new columns.
+    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+    :param short_window: The number of days for the short-term EMA (commonly 12).
+    :param long_window: The number of days for the long-term EMA (commonly 26).
+    :param signal_window: The number of days for the signal line EMA (commonly 9).
+    :return: DataFrame with new columns for MACD and Signal Line added.
+    '''
+    df[f'EMA_{short_window}'] = df['Close'].ewm(span=short_window, adjust=False).mean() # calculates the short-term EMA
+    df[f'EMA_{long_window}'] = df['Close'].ewm(span=long_window, adjust=False).mean() # calculates the long-term EMA
+    df['MACD'] = df[f'EMA_{short_window}'] - df[f'EMA_{long_window}'] # calculates the MACD line
+    df['Signal_Line'] = df['MACD'].ewm(span=signal_window, adjust=False).mean() # calculates the signal line
+    return df
+
+# print(moving_average_convergence_divergence(df_with_multi_day_returns, short_window=12, long_window=26, signal_window=9).head(50))
+
+# Bollinger Bands: Consist of a moving average and two standard deviation lines above and below it, indicating volatility and potential price breakouts.
+# Bollinger Bands are calculated using a 20-period simple moving average (SMA) as the middle band, with upper and lower bands set at two standard deviations above and below it. 
+# The bands expand with higher volatility and contract during calmer markets. They are computed using closing prices for a specified period (typically 20 days). 
+
+# Steps to calculate Bollinger Bands:
+# 1. Calculate the Middle Band (SMA):
+    # Calculate the 20-day Simple Moving Average (SMA) of the closing prices.
+# 2. Calculate the Standard Deviation (SD):
+    # Find the standard deviation of the same 20-day closing prices. This measures how much the prices deviate from the average.
+# 3. Calculate the Upper and Lower Bands:
+    # Upper Band = Middle Band + (2 * SD)
+    # Lower Band = Middle Band - (2 * SD)
+
+def bollinger_bands(df, window=20):
+    '''
+    Function to calculate Bollinger Bands and add them as new columns.
+    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+    :param window: The number of days to calculate the moving average and standard deviation over (commonly 20).
+    :return: DataFrame with new columns for Middle Band, Upper Band, and Lower Band added.
+    '''
+    df[f'Middle_Band_{window}'] = simple_moving_average(df, window)[f'MA_{window}'] # calculates the middle band using the simple moving average
+    df[f'Standard_Deviation_{window}'] = df['Close'].rolling(window=window).std() # calculates the standard deviation
+    df[f'Upper_Band_{window}'] = df[f'Middle_Band_{window}'] + (2 * df[f'Standard_Deviation_{window}']) # calculates the upper band
+    df[f'Lower_Band_{window}'] = df[f'Middle_Band_{window}'] - (2 * df[f'Standard_Deviation_{window}']) # calculates the lower band
+    return df
+
+bollinger_bands(df_with_multi_day_returns, window=20)
+
+# Volume Indicators: Volume is a crucial aspect of trading, and indicators like On-Balance Volume (OBV) or Volume Weighted Average Price (VWAP) can provide insights into the strength of price movements and potential reversals.
