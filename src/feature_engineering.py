@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from ta.momentum import RSIIndicator
 
 df = pd.read_csv('../data/AAPL_data.csv', parse_dates=['Date'])
 
@@ -178,23 +179,42 @@ def simple_moving_average(df, window=5):
 # - RSI below 30: The stock is considered oversold, which may indicate a potential buying opportunity or a reversal to the upside.
 # - RSI Near 50: The stock is considered to be in a neutral zone, where there is no clear indication of being overbought or oversold.
 
+# def relative_strength_index(df, window=14):
+#     '''
+#     Function to calculate the Relative Strength Index (RSI) and add it as a new column.
+#     :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+#     :param window: The number of days to calculate the RSI over (commonly 14).
+#     :return: DataFrame with the new RSI column added.
+#     '''
+#     delta = df['Close'].diff() # calculates the difference in close price from the previous day
+#     gain = delta.where(delta > 0, 0) # keeps gains and sets losses to 0
+#     loss = -delta.where(delta < 0, 0) # keeps losses and sets gains to 0
+#     # avg_gain = gain.rolling(window=window).mean() # calculates the average gain over the specified window
+#     # avg_loss = loss.rolling(window=window).mean() # calculates the average loss over the specified window
+#     # subsequent average (smoothing) for gains and losses
+#     avg_gain = gain.shift(1) * (window - 1) / window + gain / window # applies smoothing to the average gain
+#     avg_loss = loss.shift(1) * (window - 1) / window + loss / window # applies smoothing to the average loss
+#     rs = avg_gain / avg_loss # calculates the relative strength
+#     df[f'RSI_{window}'] = 100 - (100 / (1 + rs)) # calculates the RSI and adds it as a new column
+#     return df
+
+# Swtiched to using the 'ta' library to calculate RSI, as it handles the smoothing and edge cases more effectively, ensuring a more accurate and standard calculation of the RSI indicator.
+# The smoothing I was trying to do wasn't quite right. I was computing the rolling mean first, then applying Wilder's smoothing on top of it in one pass — but the smoothing should've replaced the rolling mean for all periods after the initial
+# one. So, it'll produce slightly off values. I could try to do this myslef, but the ta library handles this correctly and more efficiently.
+
 def relative_strength_index(df, window=14):
     '''
-    Function to calculate the Relative Strength Index (RSI) and add it as a new column.
-    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
-    :param window: The number of days to calculate the RSI over (commonly 14).
-    :return: DataFrame with the new RSI column added.
+    Calculates the RSI using the 'ta' library to ensure standard smoothing.
+    :param df: DataFrame containing a 'Close' column.
+    :param window: Period for RSI (default 14).
+    :return: DataFrame with the new RSI column.
     '''
-    delta = df['Close'].diff() # calculates the difference in close price from the previous day
-    gain = delta.where(delta > 0, 0) # keeps gains and sets losses to 0
-    loss = -delta.where(delta < 0, 0) # keeps losses and sets gains to 0
-    avg_gain = gain.rolling(window=window).mean() # calculates the average gain over the specified window
-    avg_loss = loss.rolling(window=window).mean() # calculates the average loss over the specified window
-    # subsequent average (smoothing) for gains and losses
-    avg_gain = avg_gain.shift(1) * (window - 1) / window + gain / window # applies smoothing to the average gain
-    avg_loss = avg_loss.shift(1) * (window - 1) / window + loss / window # applies smoothing to the average loss
-    rs = avg_gain / avg_loss # calculates the relative strength
-    df[f'RSI_{window}'] = 100 - (100 / (1 + rs)) # calculates the RSI and adds it as a new column
+    # Initialize the RSI Indicator
+    rsi_io = RSIIndicator(close=df['Close'], window=window)
+    
+    # Add the RSI column to the dataframe
+    df[f'RSI_{window}'] = rsi_io.rsi()
+    
     return df
 
 # print(relative_strength_index(df_with_multi_day_returns, window=14).head(50))
