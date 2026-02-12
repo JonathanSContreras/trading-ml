@@ -398,3 +398,30 @@ def build_features(df, df_name="stock_data"):
     return df
 
 build_features(df, df_name="AAPL")
+build_features(pd.read_csv('../data/MSFT_data.csv', parse_dates=['Date']), df_name="MSFT")
+build_features(pd.read_csv('../data/QQQ_data.csv', parse_dates=['Date']), df_name="QQQ")
+build_features(pd.read_csv('../data/SPY_data.csv', parse_dates=['Date']), df_name="SPY")
+build_features(pd.read_csv('../data/TSLA_data.csv', parse_dates=['Date']), df_name="TSLA")
+
+def combine_datasets(df_list, df_names):
+    '''
+    Function to combine multiple DataFrames with features into a single DataFrame for modeling.
+    :param df_list: List of DataFrames to combine.
+    :param df_names: List of names corresponding to each DataFrame for identification.
+    :return: Combined DataFrame with an additional column indicating the source dataset.
+    '''
+    combined_df = pd.DataFrame() # initializes an empty DataFrame to hold the combined data
+    for df, name in zip(df_list, df_names): # iterates through each DataFrame and its corresponding name
+        df['Dataset'] = name # adds a new column to indicate the source dataset
+        combined_df = pd.concat([combined_df, df], ignore_index=True) # concatenates the current DataFrame to the combined DataFrame
+    return combined_df
+
+appl_feat_df = pd.read_csv('../data/processed/AAPL_with_features.csv', parse_dates=['Date']) # loads the AAPL dataset with features
+msft_feat_df = pd.read_csv('../data/processed/MSFT_with_features.csv', parse_dates=['Date']) # loads the MSFT dataset with features
+qqq_feat_df = pd.read_csv('../data/processed/QQQ_with_features.csv', parse_dates=['Date']) # loads the QQQ dataset with features
+spy_feat_df = pd.read_csv('../data/processed/SPY_with_features.csv', parse_dates=['Date']) # loads the SPY dataset with features
+tsla_feat_df = pd.read_csv('../data/processed/TSLA_with_features.csv', parse_dates=['Date']) # loads the TSLA dataset with features
+datasets = [appl_feat_df, msft_feat_df, qqq_feat_df, spy_feat_df, tsla_feat_df]
+dataset_names = ["AAPL", "MSFT", "QQQ", "SPY", "TSLA"]
+
+combine_datasets(datasets, dataset_names).to_csv('../data/processed/combined_stock_data_with_features.csv', index=False) # combines all datasets and saves to a CSV file
