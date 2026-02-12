@@ -20,7 +20,7 @@ def get_target_variable(df):
     df['Target'] = (df['Next_Day_Return'] > 0).astype(int) # creates the target variable: 1 if the return is positive, else 0
     return df.drop(columns=['Next_Day_Close', 'Next_Day_Return'])
 
-df_with_target = get_target_variable(df)
+# df_with_target = get_target_variable(df)
 # print(df_with_target.head())
 
 # In the case of APPL, this means that on 2024-01-05, the price went up the next day (2024-01-08), so the target is 1.
@@ -47,7 +47,7 @@ def daily_returns(df):
     df['Daily_Return'] = df['Close'].pct_change() # calculates the percentage change in close price from the previous day
     return df
 
-df_with_returns = daily_returns(df_with_target)
+# df_with_returns = daily_returns(df_with_target)
 # print(df_with_returns.head())
 
 # In the case of APPL, the only day with a positive return is 2024-01-08, which is the day after the price went up (2024-01-05). 
@@ -68,10 +68,11 @@ def multi_day_returns(df, n_days):
     :return: DataFrame with new columns for each future day's return added.
     '''
     for i in range(1, n_days + 1):
-        df[f'Return_Day_{i}'] = (df['Close'].shift(-i) - df['Close']) / df['Close'] # calculates the return for the next i days
+        # df[f'Return_Day_{i}'] = (df['Close'].shift(-i) - df['Close']) / df['Close'] # calculates the return for the next i days / what will happen in i days compared to today
+        df[f'Return_Day_{i}'] = (df['Close'] - df['Close'].shift(i)) / df['Close'] # calculates the return for the previous i days / what has happened in the past i days compared to today
     return df
 
-df_with_multi_day_returns = multi_day_returns(df_with_target, n_days=5)
+# df_with_multi_day_returns = multi_day_returns(df_with_target, n_days=5)
 # print(df_with_multi_day_returns.head())
 
 # In the case of APPL, the returns for the next 5 days show how the price changed compared to the current day (2024-01-02).
@@ -88,7 +89,7 @@ df_with_multi_day_returns = multi_day_returns(df_with_target, n_days=5)
 # 3 2024-01-05  179.317169  180.880926  178.317559  180.118854  62379700       1     -0.004013      0.024175      0.021857      0.027652      0.024340      0.026162
 # 4 2024-01-08  183.652145  183.691743  179.633891  180.217821  59144500       0      0.024175     -0.002264      0.003395      0.000162      0.001940     -0.010401
 
-df_with_multi_day_returns = multi_day_returns(df_with_target, n_days=10)
+# df_with_multi_day_returns = multi_day_returns(df_with_target, n_days=10)
 # print(df_with_multi_day_returns.head())
 
 # In the case of APPL, the returns for the next 10 days provide a more comprehensive view of how the price evolved over a longer period.
@@ -149,6 +150,18 @@ def simple_moving_average(df, window=5):
 # 20 2024-01-31  182.504074  185.176326  182.454600  185.116930   55467800       1     -0.019357      0.013341      0.007863      0.017787      0.026573      0.027169      0.021258      0.025439      0.016208      0.004751      -0.000081  185.897305
 # 21 2024-02-01  184.938782  185.027853  181.930044  182.098295   64885400       0      0.013341     -0.005405      0.004388      0.013058      0.013647      0.007813      0.011939      0.002830     -0.008476     -0.013245      -0.014799  186.026464
 # print(simple_moving_average(df_with_multi_day_returns, window=100).head(200))
+
+# Looking at the price relative to the moving average can provide insights into the stock's momentum and potential trend reversals.
+def price_relative_to_ma(df, window=20):
+    '''
+    Function to calculate the price relative to the moving average and add it as a new column.
+    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+    :param window: The number of days to calculate the moving average over.
+    :return: DataFrame with the new price relative to MA column added.
+    '''
+    df = simple_moving_average(df, window) # first calculate the moving average
+    df[f'Price_Relative_to_MA_{window}'] = df['Close'] / df[f'MA_{window}'] - 1  # calculates the price relative to the moving average
+    return df
 
 # Indicators (RSI, MACD, Bollinger Bands, etc.): 
     # These technical indicators can help identify trends, momentum, and potential reversal points in the stock price.
@@ -276,7 +289,7 @@ def bollinger_bands(df, window=20):
     df[f'Lower_Band_{window}'] = df[f'Middle_Band_{window}'] - (2 * df[f'Standard_Deviation_{window}']) # calculates the lower band
     return df
 
-bollinger_bands(df_with_multi_day_returns, window=20)
+# bollinger_bands(df_with_multi_day_returns, window=20)
 
 # Volume Indicators (Volume SMA, Volume ratio, On-Balance Volume): 
 
@@ -327,3 +340,34 @@ def on_balance_volume(df):
     df['OBV'] = (price_change * df['Volume']).cumsum() # calculates the On-Balance Volume by multiplying the price change direction with the volume and taking the cumulative sum
 
     return df
+
+def drop_nans_warmup(df):
+    '''
+    Function to drop rows with NaN values, which can occur after calculating indicators that require a certain number of periods (e.g., moving averages).
+    :param df: DataFrame that may contain NaN values after feature engineering.
+    :return: DataFrame with NaN values dropped.
+    '''
+    return df.dropna() # drops rows with any NaN values
+
+
+
+def build_features(df):
+    '''
+    Function to build all features for the stock price prediction model.
+    :param df: DataFrame containing the raw stock data with at least 'Close', 'Volume', 'High', 'Low', and 'Open' columns.
+    :return: DataFrame with all engineered features added and NaN values dropped.
+    '''
+    df = get_target_variable(df) # adds the target variable column
+    df = daily_returns(df) # adds daily return feature
+    df = price_relative_to_ma(df, window=20) # adds price relative to 20-day moving average feature
+    df = price_relative_to_ma(df, window=50) # adds price relative to 50-day moving average feature
+    df = multi_day_returns(df, n_days=10) # adds multi-day return features
+    df = relative_strength_index(df, window=14) # adds RSI feature
+    df = moving_average_convergence_divergence(df, short_window=12, long_window=26, signal_window=9) # adds MACD and Signal Line features
+    df = bollinger_bands(df, window=20) # adds Bollinger Bands features
+    df = volume_ratio(df, window=20) # adds Volume Ratio feature (which also calculates Volume SMA)
+    df = on_balance_volume(df) # adds On-Balance Volume feature
+    df = drop_nans_warmup(df) # drops rows with NaN values resulting from feature calculations
+    return df
+
+build_features(df)
