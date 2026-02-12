@@ -351,7 +351,7 @@ def drop_nans_warmup(df):
 
 
 
-def build_features(df):
+def build_features(df, df_name="stock_data"):
     '''
     Function to build all features for the stock price prediction model.
     :param df: DataFrame containing the raw stock data with at least 'Close', 'Volume', 'High', 'Low', and 'Open' columns.
@@ -368,6 +368,7 @@ def build_features(df):
     df = volume_ratio(df, window=20) # adds Volume Ratio feature (which also calculates Volume SMA)
     df = on_balance_volume(df) # adds On-Balance Volume feature
     df = drop_nans_warmup(df) # drops rows with NaN values resulting from feature calculations
+    df.to_csv(f'../data/processed/{df_name}_with_features.csv', index=False) # saves the processed DataFrame with features to a CSV file
     return df
 
-build_features(df)
+build_features(df, df_name="AAPL")
