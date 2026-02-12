@@ -64,10 +64,10 @@
 - [x] Create target variable (AAPL only first, generalize later): (2/11)
   - [x] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down) (2/11)
   - [x] Label historical data with target (2/11)
-- [ ] Create visualization notebook `02_feature_analysis.ipynb`:
-  - [ ] Plot features vs target variable
-  - [ ] Check for obvious patterns
-  - [ ] Identify potential signal vs noise
+- [x] Create visualization notebook `02_feature_analysis.ipynb`: (2/11)
+  - [x] Plot features vs target variable (2/11)
+  - [x] Check for obvious patterns (2/11)
+  - [x] Identify potential signal vs noise (2/11)
 - [x] Save processed data with features to `data/processed/`
 
 ---
