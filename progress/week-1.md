@@ -68,7 +68,7 @@
   - [x] Plot features vs target variable (2/11)
   - [x] Check for obvious patterns (2/11)
   - [x] Identify potential signal vs noise (2/11)
-- [x] Save processed data with features to `data/processed/`
+- [x] Save processed data with features to `data/processed/` (2/11)
 
 ---
 
