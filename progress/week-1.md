@@ -60,9 +60,9 @@
   - [x] RSI (Relative Strength Index) (2/11)
   - [x] MACD (Moving Average Convergence Divergence) (2/11)
   - [x] Bollinger Bands (2/11)
-  - [ ] Volume indicators (Volume SMA, Volume ratio)
+  - [x] Volume indicators (Volume SMA, Volume ratio, On-Balance Volume) (2/11)
 - [ ] Create target variable (AAPL only first, generalize later):
-  - [x] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down) (2/10)
+  - [ ] Define prediction target: does next day's close go up or down? (binary: 1 = up, 0 = down)
   - [ ] Label historical data with target
 - [ ] Create visualization notebook `02_feature_analysis.ipynb`:
   - [ ] Plot features vs target variable

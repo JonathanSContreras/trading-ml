@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 df = pd.read_csv('../data/AAPL_data.csv', parse_dates=['Date'])
 
@@ -257,4 +258,52 @@ def bollinger_bands(df, window=20):
 
 bollinger_bands(df_with_multi_day_returns, window=20)
 
-# Volume Indicators: Volume is a crucial aspect of trading, and indicators like On-Balance Volume (OBV) or Volume Weighted Average Price (VWAP) can provide insights into the strength of price movements and potential reversals.
+# Volume Indicators (Volume SMA, Volume ratio, On-Balance Volume): 
+
+# Why volume indicators are important:
+    # If price is the "what," volume is the "why"; volume acts as a validation tool.
+        # - Confirmation of Trend: If the price is going up and volume is increasing, the trend is considered "healthy" and likely to continue. If the price is hitting new highs but volume is decreasing, 
+        # the trend is "exhausted" and a reversal might be coming.
+        # - Spotting Institutional Activity: Large spikes in volume often indicate "Smart Money" (banks or hedge funds) entering or exiting a position. Retail traders alone rarely move the volume needle significantly.
+        # - Breakout Validation: When a price breaks through a resistance level (like a Bollinger Band upper limit), high volume confirms that the breakout is real. Low volume suggests a "fakeout."
+
+# Establishes the "baseline" activity
+def volume_sma(df, window=20): 
+    '''
+    Function to calculate the Simple Moving Average (SMA) of the 'Volume' and add it as a new column.
+    :param df: DataFrame containing at least a 'Volume' column with daily trading volumes.
+    :param window: The number of days to calculate the moving average over (commonly 20).
+    :return: DataFrame with the new Volume SMA column added.
+    '''
+    df[f'Volume_SMA_{window}'] = df['Volume'].rolling(window=window).mean() # calculates the simple moving average of volume
+    return df
+
+# Identifies "Spikes" or unusual interest in the stock
+def volume_ratio(df, window=20):
+    '''
+    Function to calculate the Volume Ratio (current volume divided by the Volume SMA) and add it as a new column.
+    :param df: DataFrame containing at least a 'Volume' column with daily trading volumes and a 'Volume_SMA' column.
+    :param window: The number of days used for the Volume SMA (commonly 20).
+    :return: DataFrame with the new Volume Ratio column added.
+    '''
+    df = volume_sma(df, window) # ensures that the Volume SMA is calculated
+    df[f'Volume_Ratio_{window}'] = df['Volume'] / df[f'Volume_SMA_{window}'] # calculates the volume ratio
+    return df
+
+# Shows if the "Smart Money" is accumulating or selling.
+def on_balance_volume(df):
+    '''
+    Function to calculate the On-Balance Volume (OBV) and add it as a new column.
+    :param df: DataFrame containing at least 'Close' and 'Volume' columns with daily closing prices and trading volumes.
+    :return: DataFrame with the new OBV column added.
+    '''
+    # Calculate price change direction: 1 if up, -1 if down, 0 if flat
+    price_change = np.sign(df['Close'].diff())
+
+    # Fill the first NaN from diff() with 0
+    price_change.fillna(0, inplace=True)
+    
+    # OBV is the cumulative sum of (direction * volume)
+    df['OBV'] = (price_change * df['Volume']).cumsum() # calculates the On-Balance Volume by multiplying the price change direction with the volume and taking the cumulative sum
+
+    return df
