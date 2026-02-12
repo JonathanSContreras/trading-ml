@@ -259,6 +259,7 @@ def moving_average_convergence_divergence(df, short_window=12, long_window=26, s
     df[f'EMA_{long_window}'] = df['Close'].ewm(span=long_window, adjust=False).mean() # calculates the long-term EMA
     df['MACD'] = df[f'EMA_{short_window}'] - df[f'EMA_{long_window}'] # calculates the MACD line
     df['Signal_Line'] = df['MACD'].ewm(span=signal_window, adjust=False).mean() # calculates the signal line
+    df[f'MACD_Histogram_{signal_window}'] = df['MACD'] - df['Signal_Line'] # calculates the MACD histogram
     return df
 
 # print(moving_average_convergence_divergence(df_with_multi_day_returns, short_window=12, long_window=26, signal_window=9).head(50))
@@ -341,6 +342,29 @@ def on_balance_volume(df):
 
     return df
 
+def bollinger_normalized(df, window=20):
+    '''
+    Function to calculate the Bollinger Normalized value, which indicates how far the price is from the middle band in terms of standard deviations.
+    :param df: DataFrame containing at least a 'Close' column with daily closing prices.
+    :param window: The number of days to calculate the moving average and standard deviation over (commonly 20).
+    :return: DataFrame with a new column for Bollinger Normalized added.
+    '''
+    df = bollinger_bands(df, window) # ensures that Bollinger Bands are calculated
+    df[f'Bollinger_Normalized_{window}'] = (df['Close'] - df[f'Middle_Band_{window}']) / df[f'Standard_Deviation_{window}'] # calculates the Bollinger Normalized value
+    return df
+
+def obv_rate_of_change(df, window=20):
+    '''
+    Function to calculate the Rate of Change (ROC) of the On-Balance Volume (OBV) and add it as a new column.
+    :param df: DataFrame containing at least an 'OBV' column with the On-Balance Volume values.
+    :param window: The number of days to calculate the ROC over (commonly 20).
+    :return: DataFrame with a new column for OBV Rate of Change added.
+    '''
+    df[f'OBV_ROC_{window}'] = df['OBV'].pct_change(periods=window) # calculates the percentage change in OBV over the specified window
+    # check for extreme values in OBV_ROC and cap them to a reasonable range (e.g., -10 to 10) to prevent outliers from skewing the model
+    df[f'OBV_ROC_{window}'] = df[f'OBV_ROC_{window}'].clip(lower=-10, upper=10) # caps the OBV ROC values to a range of -10 to 10 to handle outliers
+    return df
+
 def drop_nans_warmup(df):
     '''
     Function to drop rows with NaN values, which can occur after calculating indicators that require a certain number of periods (e.g., moving averages).
@@ -364,9 +388,11 @@ def build_features(df, df_name="stock_data"):
     df = multi_day_returns(df, n_days=10) # adds multi-day return features
     df = relative_strength_index(df, window=14) # adds RSI feature
     df = moving_average_convergence_divergence(df, short_window=12, long_window=26, signal_window=9) # adds MACD and Signal Line features
-    df = bollinger_bands(df, window=20) # adds Bollinger Bands features
+    # df = bollinger_bands(df, window=20) # adds Bollinger Bands features
+    df = bollinger_normalized(df, window=20) # adds Bollinger Normalized feature
     df = volume_ratio(df, window=20) # adds Volume Ratio feature (which also calculates Volume SMA)
     df = on_balance_volume(df) # adds On-Balance Volume feature
+    df = obv_rate_of_change(df, window=20) # adds OBV Rate of Change feature
     df = drop_nans_warmup(df) # drops rows with NaN values resulting from feature calculations
     df.to_csv(f'../data/processed/{df_name}_with_features.csv', index=False) # saves the processed DataFrame with features to a CSV file
     return df
